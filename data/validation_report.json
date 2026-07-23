@@ -1,0 +1,67 @@
+{
+  "source_file": "data.csv",
+  "rows_read": 553322,
+  "rows_kept": 553308,
+  "rows_dropped": 14,
+  "duplicate_ids_dropped": 2,
+  "invalid_entry_dates": 0,
+  "invalid_release_dates": 0,
+  "release_before_entry": 0,
+  "missing_required_values": {
+    "id": 0,
+    "country": 0,
+    "gender": 0,
+    "entry_date": 0,
+    "release_date": 0,
+    "sponsor_zipcode": 12,
+    "relationship": 0
+  },
+  "sponsor_category_raw_counts": {
+    "2": 258165,
+    "1": 230817,
+    "3": 63684,
+    "<blank>": 656
+  },
+  "sponsor_category_normalized_counts": {
+    "2": 258159,
+    "1": 230811,
+    "3": 63682,
+    "4": 656
+  },
+  "country_normalized_counts": {
+    "Guatemala": 254267,
+    "Honduras": 152725,
+    "El Salvador": 95994,
+    "Mexico": 14958,
+    "Ecuador": 9083,
+    "Nicaragua": 8098,
+    "Other": 7354,
+    "India": 2892,
+    "Venezuela": 2427,
+    "Cuba": 2388,
+    "Colombia": 1766,
+    "Afghanistan": 1356
+  },
+  "date_range_entry": {
+    "min": "2015-01-01",
+    "max": "2023-05-23"
+  },
+  "date_range_release": {
+    "min": "2015-01-09",
+    "max": "2023-05-26"
+  },
+  "output_counts": {
+    "individual_records": 35849,
+    "cohort_records": 13630,
+    "monthly_records": 101,
+    "full_valid_records": 553308
+  },
+  "assumptions": [
+    "Blank or unexpected sponsor categories normalize to Category 4 unless --strict-missing is used.",
+    "Countries are matched case-insensitively after trimming/collapsing whitespace; all non-featured values become Other.",
+    "The individual file includes every stay overlapping 2016-10-01 through 2017-02-28.",
+    "By default, full outputs include every stay overlapping 2015-01-01 through 2023-05-31.",
+    "Monthly activePopulation is a month-end snapshot using entryDate <= snapshot < releaseDate.",
+    "Monthly countryCounts describe entries; monthly sponsorCategoryCounts describe releases."
+  ]
+}

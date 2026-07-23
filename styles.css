@@ -1,0 +1,17 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 40px;
+    background: #fafafa;
+}
+
+h1 {
+    text-align: center;
+}
+
+#chart {
+    margin-top: 40px;
+}
+
+svg {
+    border: 1px solid #ccc;
+}

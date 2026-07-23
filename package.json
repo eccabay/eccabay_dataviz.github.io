@@ -1,0 +1,27 @@
+{
+  "name": "eccabay_dataviz.github.io",
+  "version": "1.0.0",
+  "description": "Final data visualization project for CS 416",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eccabay/eccabay_dataviz.github.io.git"
+  },
+  "author": "Becca McBrayer Palm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eccabay/eccabay_dataviz.github.io/issues"
+  },
+  "homepage": "https://github.com/eccabay/eccabay_dataviz.github.io#readme",
+  "devDependencies": {
+    "vite": "^8.1.5"
+  },
+  "dependencies": {
+    "d3": "^7.9.0"
+  }
+}

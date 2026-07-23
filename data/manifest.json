@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "individualWindow": {
+    "start": "2016-10-01",
+    "end": "2017-02-28"
+  },
+  "fullStoryWindow": {
+    "start": "2015-01-01",
+    "end": "2023-05-31"
+  },
+  "countryDomain": [
+    "Guatemala",
+    "Honduras",
+    "El Salvador",
+    "Mexico",
+    "Ecuador",
+    "Nicaragua",
+    "India",
+    "Venezuela",
+    "Cuba",
+    "Colombia",
+    "Afghanistan",
+    "Other"
+  ],
+  "sponsorCategories": [
+    {
+      "id": "1",
+      "label": "Parent"
+    },
+    {
+      "id": "2",
+      "label": "Sibling"
+    },
+    {
+      "id": "3",
+      "label": "Distant Relative or Unrelated"
+    },
+    {
+      "id": "4",
+      "label": "Family Friend"
+    }
+  ],
+  "files": [
+    "cohorts.csv",
+    "cohorts.json",
+    "country_totals.csv",
+    "country_totals.json",
+    "individual_children.csv",
+    "individual_children.json",
+    "monthly_summary.csv",
+    "monthly_summary.json",
+    "sponsor_category_totals.csv",
+    "sponsor_category_totals.json",
+    "validation_report.json"
+  ]
+}
