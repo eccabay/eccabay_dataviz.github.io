@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:data": "node scripts/build_derived_summary.mjs",
+    "validate": "node scripts/validate_integration.mjs"
   },
   "repository": {
     "type": "git",

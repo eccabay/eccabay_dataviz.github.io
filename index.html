@@ -1,20 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D3 Starter</title>
-
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unaccompanied Migrant Children</title><link rel="stylesheet" href="/styles.css">
 </head>
-
-<body>
-
-<h1>D3 Boilerplate</h1>
-
-<div id="chart"></div>
-
-<script type="module" src="src/date_flow.js"></script>
-
-</body>
+<body><main class="page-shell">
+  <header class="site-header"><h1>Migration in the United States</h1><h3>Unaccompanied children migrating to the US | January 2015 - May 2023</h3></header>
+  <p id="app-error" class="app-error" role="alert" hidden></p>
+  <section id="scene-one" class="scene" inert><h2 id="scene-one-title" tabindex="-1">Who are the children?</h2><div class="chart-grid"><article class="chart-card chart-card-wide"><h3>Country of origin</h3><div class="chart country-chart"></div></article><article class="chart-card"><h3>Reported gender</h3><div class="chart gender-chart"></div></article><article class="chart-card"><h3>Sponsor category</h3><div class="chart sponsor-chart"></div></article></div><div class="scene-actions"></div></section>
+  <section id="scene-two" class="scene" inert><h2 id="scene-two-title" tabindex="-1">When did they come?</h2><p class="scene-intro">The number of children entering care changed sharply from month to month and had critical changes at times of presidential change.</p><article class="chart-card chart-card-wide"><h3>Children Entering per Month</h3><div class="chart monthly-chart"></div></article><div class="scene-actions"></div></section>
+  <section id="scene-three" class="scene" inert><h2 id="scene-three-title" tabindex="-1">How did this change over time?</h2><p class="scene-intro">Select a country for details on its children's migration patterns.</p><article class="chart-card chart-card-wide"><h3 class="selected-country-label" id="selected-country-label">All countries shown</h3><div class="chart country-monthly-chart"></div></article><div class="country-controls"><div class="country-legend" ></div><aside class="country-details"></aside></div><p class="scene-copy">The seven featured countries have the largest number of immigrants. All other countries are combined into "Other".</p></section>
+</main><script type="module" src="/src/main.js"></script></body>
 </html>
