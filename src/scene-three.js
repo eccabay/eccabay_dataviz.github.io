@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { addAnnotationLines, addAxes, countryColor, createSvg, formatCount, formatPercent } from "./helpers.js";
+import { addAnnotationLines, addAxes, countryColor, createSvg, createTooltip, formatCount, formatPercent } from "./helpers.js";
 
 const width = 840;
 const height = 470;
@@ -17,6 +17,19 @@ function countrySeries(months, countries) {
     country,
     values: months.map((month) => ({ month: month.month, value: month.countries[country] ?? 0 }))
   }));
+}
+
+function maxSeriesValue(series) {
+  return d3.max(series, (country) => d3.max(country.values, (d) => d.value)) ?? 0;
+}
+
+function renderOtherBreakdown(panel, data) {
+  const rows = data.otherCountryTotals ?? [];
+  const total = d3.sum(rows, (row) => row.count);
+  const section = panel.append("section").attr("class", "details-group other-details");
+  section.append("h5").text("Other breakdown");
+  section.append("p").attr("class", "other-total").text(`${formatCount(total)} total from the rows inside Other`);
+  section.append("div").attr("class", "other-country-list").selectAll("p").data(rows).join("p").text((row) => `${row.country}: ${formatCount(row.count)}`);
 }
 
 export function renderCountryDetails(container, country, data) {
@@ -47,34 +60,56 @@ export function renderCountryDetails(container, country, data) {
   sponsors.append("h5").text("Sponsor category");
   sponsors.selectAll("p").data(["1", "2", "3", "4"]).join("p")
     .text((key) => `${sponsorLabels.get(key)}: ${formatPercent(detail.sponsors[key] / sponsorTotal)}`);
+
+  if (country === "Other") {
+    renderOtherBreakdown(panel, data);
+  }
 }
 
 export function renderSceneThree(root, data, state) {
   const scene = d3.select(root);
+  const tooltip = createTooltip();
   const countries = data.featuredCountries;
   const series = countrySeries(data.months, countries);
-  const { svg, plot, width: innerWidth, height: innerHeight } = createSvg(
-    scene.select(".country-monthly-chart").node(), width, height, margin
-  );
+  const chartHost = scene.select(".country-monthly-chart");
 
-  const x = d3.scaleTime().domain(d3.extent(data.months, (d) => d.month)).range([0, innerWidth]);
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(series, (country) => d3.max(country.values, (d) => d.value))])
-    .nice()
-    .range([innerHeight, 0]);
-  const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
+  function drawChart(selectedCountry) {
+    chartHost.selectAll("*").remove();
+    const { plot, width: innerWidth, height: innerHeight } = createSvg(chartHost.node(), width, height, margin);
+    const x = d3.scaleTime().domain(d3.extent(data.months, (d) => d.month)).range([0, innerWidth]);
+    const visibleSeries = selectedCountry ? series.filter((item) => item.country === selectedCountry) : series;
+    const y = d3.scaleLinear().domain([0, maxSeriesValue(visibleSeries)]).nice().range([innerHeight, 0]);
+    const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
 
-  plot.append("g").attr("class", "grid")
-    .call(d3.axisLeft(y).ticks(5).tickSize(-innerWidth).tickFormat(""));
-  addAxes(plot, x, y, innerWidth, innerHeight, { xLabel: "Month", yLabel: "Children entering the United States" });
-  addAnnotationLines(plot, x, innerHeight, annotations);
+    plot.append("g").attr("class", "grid")
+      .call(d3.axisLeft(y).ticks(5).tickSize(-innerWidth).tickFormat(""));
+    addAxes(plot, x, y, innerWidth, innerHeight, { xLabel: "Month", yLabel: "Children entering the United States" });
+    addAnnotationLines(plot, x, innerHeight, annotations);
 
-  const lines = plot.append("g").attr("class", "country-lines")
-    .selectAll("path").data(series, (d) => d.country).join("path")
-    .attr("class", "country-line")
-    .attr("data-country", (d) => d.country)
-    .attr("stroke", (d) => countryColor(d.country))
-    .attr("d", (d) => line(d.values));
+    const lineGroup = plot.append("g").attr("class", "country-lines");
+    const lines = lineGroup.selectAll("path").data(visibleSeries, (d) => d.country).join("path")
+      .attr("class", "country-line")
+      .attr("data-country", (d) => d.country)
+      .attr("stroke", (d) => countryColor(d.country))
+      .attr("d", (d) => line(d.values));
+
+    plot.append("g").attr("class", "country-line-hover")
+      .selectAll("path").data(visibleSeries, (d) => d.country).join("path")
+      .attr("class", "country-line-hit")
+      .attr("data-country", (d) => d.country)
+      .attr("d", (d) => line(d.values))
+      .attr("fill", "none")
+      .attr("stroke", "transparent")
+      .attr("stroke-width", 18)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .style("cursor", "help")
+      .on("pointerenter", (event, d) => tooltip.show(event, d.country))
+      .on("pointermove", (event) => tooltip.move(event))
+      .on("pointerleave", () => tooltip.hide());
+
+    return lines;
+  }
 
   const legend = scene.select(".country-legend");
   legend.selectAll("*").remove();
@@ -98,15 +133,11 @@ export function renderSceneThree(root, data, state) {
 
   function selectCountry(country) {
     state.selectedCountry = country;
-    const selected = country ? lines.filter((d) => d.country === country) : null;
-    lines.classed("is-selected", (d) => d.country === country)
-      .classed("is-muted", (d) => Boolean(country) && d.country !== country)
-      .raise();
     buttons.classed("is-selected", (d) => d === country);
-    reset.classed("is-selected", !country)
+    reset.classed("is-selected", !country);
     selectedLabel.text(country ? `${country} selected` : "All countries shown");
+    drawChart(country);
     renderCountryDetails(details.node(), country, data);
-    if (selected) selected.raise();
   }
 
   selectCountry(state.selectedCountry ?? null);
