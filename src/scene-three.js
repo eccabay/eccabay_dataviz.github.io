@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { COLORS, addAnnotationLines, addAxes, createSvg, formatCount, formatPercent } from "./helpers.js";
+import { addAnnotationLines, addAxes, countryColor, createSvg, formatCount, formatPercent } from "./helpers.js";
 
 const width = 840;
 const height = 470;
@@ -62,7 +62,6 @@ export function renderSceneThree(root, data, state) {
     .domain([0, d3.max(series, (country) => d3.max(country.values, (d) => d.value))])
     .nice()
     .range([innerHeight, 0]);
-  const color = d3.scaleOrdinal().domain(countries).range(COLORS.countries);
   const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
 
   plot.append("g").attr("class", "grid")
@@ -74,7 +73,7 @@ export function renderSceneThree(root, data, state) {
     .selectAll("path").data(series, (d) => d.country).join("path")
     .attr("class", "country-line")
     .attr("data-country", (d) => d.country)
-    .attr("stroke", (d) => color(d.country))
+    .attr("stroke", (d) => countryColor(d.country))
     .attr("d", (d) => line(d.values));
 
   const legend = scene.select(".country-legend");
@@ -86,7 +85,7 @@ export function renderSceneThree(root, data, state) {
     .attr("class", "country-button")
     .on("click", (_, country) => selectCountry(country));
   buttons.append("span").attr("class", "legend-swatch")
-    .style("background-color", (country) => color(country));
+    .style("background-color", (country) => countryColor(country));
   buttons.append("span").text((country) => country);
 
   const reset = legend.append("button").attr("type", "button")

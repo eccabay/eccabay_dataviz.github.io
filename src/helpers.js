@@ -1,10 +1,19 @@
 import * as d3 from "d3";
 
+const COUNTRY_COLOR_VALUES = ["#2f4f9f", "#4b78a3", "#5594b5", "#639967", "#4e64a4", "#79aebf", "#a65f69", "#65747a"];
+const COUNTRY_NAMES = ["Guatemala", "Honduras", "El Salvador", "Mexico", "Ecuador", "Nicaragua", "India", "Other"];
+export const COUNTRY_COLORS = Object.freeze(Object.fromEntries(
+    COUNTRY_NAMES.map((country, index) => [country, COUNTRY_COLOR_VALUES[index]])
+));
+export const countryColor = (country) => COUNTRY_COLORS[country] ?? "#333333";
+
 export const COLORS = {
-    countries:["#245b73","#3f7f8f","#6a9e9a","#d4875d","#c36a4c","#9a6a8f","#6f789b","#9aa3a8"],
-    gender:["#245b73","#d45d9e"],
-    sponsors:["#6a9e9a","#d4875d","#9a6a8f","#6f789b"]
+    countries: COUNTRY_COLOR_VALUES,
+    gender:["#2b7896","#c06f9f"],
+    sponsors:["#9f4c48","#c2b64f","#4f6096","#5d9368"]
 };
+const SPONSOR_NAMES = ["Parent", "Sibling", "Distant Relative or Unrelated", "Family Friend"];
+export const sponsorColor = (label) => COLORS.sponsors[SPONSOR_NAMES.indexOf(label)] ?? COLORS.sponsors[0];
 export const formatCount = d3.format(",d");
 export const formatPercent = (value)=>d3.format(".1%")(+value||0);
 export const formatMonth=d3.timeFormat("%b %Y");

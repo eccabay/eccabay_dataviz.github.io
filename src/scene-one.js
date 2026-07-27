@@ -1,8 +1,9 @@
 import * as d3 from "d3";
-import { COLORS, createSvg, formatCount, formatPercent } from "./helpers.js";
+import { COLORS, countryColor, createSvg, formatCount, formatPercent, sponsorColor } from "./helpers.js";
 
-const margin = { top: 25, right: 25, bottom: 25, left: 75 };
-
+// Leave room for labels placed just beyond the end of each bar. Without this
+// gutter, the label for the maximum value falls outside the SVG viewBox.
+const margin = { top: 25, right: 100, bottom: 25, left: 75 };
 function renderBars(container, values, color, label) {
 
   // Configure size
@@ -45,11 +46,11 @@ export function renderSceneOne(root, data) {
 
   renderBars(scene.select(".country-chart").node(), [...data.countryTotals]
     .sort((a, b) => d3.descending(a.count, b.count))
-    .map((d) => ({ label: d.country, value: d.count })), COLORS.countries[0], "Country of origin totals");
+    .map((d) => ({ label: d.country, value: d.count, color: countryColor(d.country) })), COLORS.countries[0], "Country of origin totals");
 
   renderGender(scene.select(".gender-chart").node(), data.genderTotals);
   
   renderBars(scene.select(".sponsor-chart").node(), [...data.sponsorTotals]
     .sort((a, b) => d3.descending(a.count, b.count))
-    .map((d) => ({ label: d.label, value: d.count })), COLORS.sponsors[0], "Sponsor category totals");
+    .map((d) => ({ label: d.label, value: d.count, color: sponsorColor(d.label) })), sponsorColor("Parent"), "Sponsor category totals");
 }
