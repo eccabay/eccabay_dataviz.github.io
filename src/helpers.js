@@ -71,7 +71,7 @@ function renderPercentageBars(container, values, title) {
   const total = d3.sum(values, (d) => d.value);
   renderBars(container, values.map((d) => ({
     ...d,
-    annotation: `${formatPercent(d.value / total)} (${formatCount(d.value)})`
+    annotation: `${formatCount(d.value)} (${formatPercent(d.value / total)})`
   })), values[0]?.color ?? COLORS.gender[0], title);
 }
 
