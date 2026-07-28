@@ -21,20 +21,14 @@ function showScene(index, { focus = true } = {}) {
   }
 }
 
-try {
-  const data = await loadData();
-  const sceneOne = d3.select("#scene-one");
-  const sceneTwo = d3.select("#scene-two");
-  const sceneThree = d3.select("#scene-three");
+const data = await loadData();
+const sceneOne = d3.select("#scene-one");
+const sceneTwo = d3.select("#scene-two");
+const sceneThree = d3.select("#scene-three");
 
-  renderSceneOne(sceneOne.node(), data);
-  renderNextButton(sceneOne.select(".scene-actions").node(), "When did they come?", () => showScene(1));
-  renderSceneTwo(sceneTwo.node(), data);
-  renderNextButton(sceneTwo.select(".scene-actions").node(), "How did this change over time?", () => showScene(2));
-  renderSceneThree(sceneThree.node(), data, state);
-  showScene(0, { focus: false });
-} catch (error) {
-  console.error(error);
-  progress.text("The visualization could not be loaded.");
-  errorMessage.text("The data could not be loaded. Refresh the page to try again.").attr("hidden", null);
-}
+renderSceneOne(sceneOne.node(), data);
+renderNextButton(sceneOne.select(".scene-actions").node(), "When did they come?", () => showScene(1));
+renderSceneTwo(sceneTwo.node(), data);
+renderNextButton(sceneTwo.select(".scene-actions").node(), "How did this change over time?", () => showScene(2));
+renderSceneThree(sceneThree.node(), data, state);
+showScene(0, { focus: false });

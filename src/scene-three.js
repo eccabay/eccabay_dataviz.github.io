@@ -1,9 +1,6 @@
 import * as d3 from "d3";
 import { addAnnotationLines, addAxes, countryColor, createSvg, createTooltip, formatCount, formatPercent } from "./helpers.js";
 
-const width = 840;
-const height = 470;
-const margin = { top: 72, right: 30, bottom: 58, left: 72 };
 const annotations = [
   { date: new Date("2016-11-08T00:00:00"), label: "Donald Trump elected" },
   { date: new Date("2017-01-20T00:00:00"), label: "Donald Trump takes office" },
@@ -28,8 +25,8 @@ function renderOtherBreakdown(panel, data) {
   const total = d3.sum(rows, (row) => row.count);
   const section = panel.append("section").attr("class", "details-group other-details");
   section.append("h5").text("Other breakdown");
-  section.append("p").attr("class", "other-total").text(`${formatCount(total)} total from the rows inside Other`);
-  section.append("div").attr("class", "other-country-list").selectAll("p").data(rows).join("p").text((row) => `${row.country}: ${formatCount(row.count)}`);
+  section.append("p").attr("class", "other-total").text(`${formatCount(total)} total from other countries`);
+  section.append("div").attr("class", "other-country-list").selectAll("p").data(rows).enter().append("p").text((row) => `${row.country}: ${formatCount(row.count)}`);
 }
 
 export function renderCountryDetails(container, country, data) {
@@ -53,12 +50,12 @@ export function renderCountryDetails(container, country, data) {
   const groups = panel.append("div").attr("class", "details-groups");
   const gender = groups.append("section").attr("class", "details-group");
   gender.append("h5").text("Reported gender");
-  gender.selectAll("p").data(["M", "F"]).join("p")
+  gender.selectAll("p").data(["M", "F"]).enter().append("p")
     .text((key) => `${key === "M" ? "Male" : "Female"}: ${formatPercent(detail.gender[key] / genderTotal)}`);
 
   const sponsors = groups.append("section").attr("class", "details-group");
   sponsors.append("h5").text("Sponsor category");
-  sponsors.selectAll("p").data(["1", "2", "3", "4"]).join("p")
+  sponsors.selectAll("p").data(["1", "2", "3", "4"]).enter().append("p")
     .text((key) => `${sponsorLabels.get(key)}: ${formatPercent(detail.sponsors[key] / sponsorTotal)}`);
 
   if (country === "Other") {
@@ -75,9 +72,10 @@ export function renderSceneThree(root, data, state) {
 
   function drawChart(selectedCountry) {
     chartHost.selectAll("*").remove();
-    const { plot, width: innerWidth, height: innerHeight } = createSvg(chartHost.node(), width, height, margin);
-    const x = d3.scaleTime().domain(d3.extent(data.months, (d) => d.month)).range([0, innerWidth]);
+    const { plot, width: innerWidth, height: innerHeight } = createSvg(chartHost.node());
     const visibleSeries = selectedCountry ? series.filter((item) => item.country === selectedCountry) : series;
+
+    const x = d3.scaleTime().domain(d3.extent(data.months, (d) => d.month)).range([0, innerWidth]);
     const y = d3.scaleLinear().domain([0, maxSeriesValue(visibleSeries)]).nice().range([innerHeight, 0]);
     const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
 
@@ -87,14 +85,14 @@ export function renderSceneThree(root, data, state) {
     addAnnotationLines(plot, x, innerHeight, annotations);
 
     const lineGroup = plot.append("g").attr("class", "country-lines");
-    const lines = lineGroup.selectAll("path").data(visibleSeries, (d) => d.country).join("path")
+    const lines = lineGroup.selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
       .attr("class", "country-line")
       .attr("data-country", (d) => d.country)
       .attr("stroke", (d) => countryColor(d.country))
       .attr("d", (d) => line(d.values));
 
     plot.append("g").attr("class", "country-line-hover")
-      .selectAll("path").data(visibleSeries, (d) => d.country).join("path")
+      .selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
       .attr("class", "country-line-hit")
       .attr("data-country", (d) => d.country)
       .attr("d", (d) => line(d.values))
@@ -103,7 +101,6 @@ export function renderSceneThree(root, data, state) {
       .attr("stroke-width", 18)
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
-      .style("cursor", "help")
       .on("pointerenter", (event, d) => tooltip.show(event, d.country))
       .on("pointermove", (event) => tooltip.move(event))
       .on("pointerleave", () => tooltip.hide());
@@ -115,7 +112,7 @@ export function renderSceneThree(root, data, state) {
   legend.selectAll("*").remove();
   legend.append("h4").attr("id", "country-legend-title").text("Select a country");
   const controls = legend.append("div").attr("class", "legend-controls");
-  const buttons = controls.selectAll("button").data(countries).join("button")
+  const buttons = controls.selectAll("button").data(countries).enter().append("button")
     .attr("type", "button")
     .attr("class", "country-button")
     .on("click", (_, country) => selectCountry(country));
