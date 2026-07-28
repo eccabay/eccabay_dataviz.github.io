@@ -16,6 +16,9 @@ function showScene(index, { focus = true } = {}) {
   scenes
     .classed("is-active", (_, i) => i === index)
     .attr("inert", (_, i) => i === index ? null : "");
+  if (!progress.empty()) {
+    progress.text(`Scene ${index + 1} of ${scenes.size()}`);
+  }
   if (focus) {
     d3.select(scenes.nodes()[index]).select("h2").node()?.focus();
   }

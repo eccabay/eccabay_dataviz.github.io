@@ -45,6 +45,7 @@
     "cohorts.json",
     "country_totals.csv",
     "country_totals.json",
+    "country_totals_raw.json",
     "individual_children.csv",
     "individual_children.json",
     "monthly_summary.csv",

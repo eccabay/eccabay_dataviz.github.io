@@ -52,7 +52,6 @@ h3 {
 }
 h1 {
   font-size: clamp(2.5rem, 6vw, 4.5rem);
-  max-width: 840px;
 }
 h2 {
   font-size: clamp(1.8rem, 4vw, 3rem);
@@ -73,15 +72,17 @@ h3 {
 }
 .scene-intro {
   font-size: 1.1rem;
-  max-width: 840px;
   margin: 18px 0 30px;
 }
 #scene-two > h3 {
   margin: 14px 0 32px;
-  max-width: 1000px;
 }
 #scene-two .chart-grid {
   margin-top: 8px;
+}
+#scene-two .sponsor-blurb {
+  grid-column: 1 / -1;
+  margin: 0 0 8px;
 }
 .chart-grid {
   display: grid;
@@ -140,13 +141,11 @@ svg {
   color: #55717a;
   font-size: 0.9rem;
   margin: 24px 0;
-  max-width: 840px;
 }
 .chart-note {
   color: #55717a;
   font-size: 0.8rem;
   margin: 12px 0 0;
-  max-width: 840px;
 }
 .app-error {
   background: #fff1ed;
@@ -354,10 +353,30 @@ button:focus-visible {
   transform: translateY(0);
 }
 
+.country-trend {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+}
+.country-trend h5 {
+  margin: 0;
+}
+.country-trend-text {
+  color: #55717a;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
 .other-details {
   display: grid;
   gap: 8px;
   margin-top: 14px;
+}
+.other-note {
+  color: #55717a;
+  font-size: 0.9rem;
+  margin: 0;
 }
 .other-total {
   color: #55717a;
@@ -368,6 +387,47 @@ button:focus-visible {
   display: grid;
   gap: 4px;
 }
-.other-country-list p {
+.other-country-row {
   margin: 0;
+}
+
+
+.progress {
+  color: #55717a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 14px 0 0;
+}
+
+#scene-two .country-blurb,
+#scene-two .sponsor-blurb {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+#scene-two .country-blurb {
+  color: #18323d;
+  font-weight: 600;
+}
+#scene-two .sponsor-blurb {
+  margin-top: -10px;
+}
+
+.scene-emphasis {
+  max-width: 72ch;
+}
+
+.country-legend {
+  display: grid;
+  gap: 10px;
+}
+.legend-help {
+  color: #55717a;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.details-prompt {
+  color: #55717a;
+  margin: 0;
+  max-width: 42ch;
 }

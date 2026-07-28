@@ -12,7 +12,11 @@
   </script>
 </head>
 <body><main class="page-shell">
-  <header class="site-header"><h1>Presidents and Child Immigrants</h1><h3>How the number of unaccompanied children migrating to the US differed between presidencies | January 2015 - May 2023</h3></header>
+  <header class="site-header">
+    <h1>Presidents and Child Immigrants</h1>
+    <h3>How the number of unaccompanied children migrating to the US differed between presidencies | January 2015 - May 2023</h3>
+    <p id="progress" class="progress"></p>
+  </header>
 
   <section id="scene-one" class="scene" inert>
     <h2 id="scene-one-title" tabindex="-1">When did they come?</h2>
@@ -31,6 +35,7 @@
       <article class="chart-card chart-card-wide">
         <h3>Country of origin</h3><div class="chart country-chart"></div>
       </article>
+      <p class="scene-copy sponsor-blurb">A sponsor is the adult or family member who takes responsibility for a child after release from government custody. That person can be a parent, sibling, distant relative, or family friend.</p>
       <article class="chart-card">
         <h3>Reported gender</h3><div class="chart gender-chart"></div>
       </article>
@@ -43,12 +48,12 @@
   
   <section id="scene-three" class="scene" inert>
     <h2 id="scene-three-title" tabindex="-1">How did this change over time?</h2>
-    <p class="scene-intro">Select a country for details on its children's migration patterns.</p>
+    <p class="scene-intro">Click a country to see details of its gender and sponsor distributions.</p>
     <article class="chart-card chart-card-wide">
       <h3 class="selected-country-label" id="selected-country-label">All countries shown</h3><div class="chart country-monthly-chart"></div>
     </article>
     <div class="country-controls"><div class="country-legend" ></div><aside class="country-details"></aside></div>
-    <p class="scene-copy">The seven featured countries have the largest number of immigrants. All other countries are combined into "Other".</p>
+    <p class="scene-copy">Select a country to see its total, gender breakdown, sponsor categories, and a brief trend summary. Selecting the grouped-country option shows the smaller countries list.</p>
   </section>
 
   <footer class="site-footer"><span>Data Source: </span><a href="https://github.com/nytimes/hhs-child-migrant-data" rel="noreferrer">https://github.com/nytimes/hhs-child-migrant-data</a></footer></main>

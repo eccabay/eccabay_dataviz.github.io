@@ -12,13 +12,42 @@ function maxSeriesValue(series) {
   return d3.max(series, (country) => d3.max(country.values, (d) => d.value)) ?? 0;
 }
 
+const FEATURED_COUNTRY_TRENDS = {
+  Guatemala: "Dominates the timeline, with a major surge after 2020 and the largest totals overall.",
+  Honduras: "Follows the same broad shape as Guatemala, rising sharply in 2021-2022 before easing.",
+  "El Salvador": "Starts high, drops in the middle years, then rebounds modestly later on.",
+  Mexico: "Stays comparatively low and steady, with a late uptick in 2021-2023.",
+  Ecuador: "Builds gradually, then jumps in 2019 and remains elevated through 2023.",
+  Nicaragua: "Moves from small counts to a strong 2021-2022 peak before falling back.",
+  India: "Remains a smaller but persistent line, with its strongest stretch in the late 2010s."
+};
+
+const GROUPED_COUNTRIES_LABEL = "Grouped countries";
+
+function displayCountryLabel(country) {
+  return country === "Other" ? GROUPED_COUNTRIES_LABEL : country;
+}
+
 function renderOtherBreakdown(panel, data) {
   const rows = data.otherCountryTotals ?? [];
   const total = d3.sum(rows, (row) => row.count);
   const section = panel.append("section").attr("class", "details-group other-details");
-  section.append("h5").text("Other breakdown");
-  section.append("p").attr("class", "other-total").text(`${formatCount(total)} total from other countries`);
-  section.append("div").attr("class", "other-country-list").selectAll("p").data(rows).enter().append("p").text((row) => `${row.country}: ${formatCount(row.count)}`);
+  section.append("p").attr("class", "other-note").text("Countries with more than 100 total children are are listed individually. The others are grouped below.");
+  section.append("p").attr("class", "other-total").text(`${formatCount(total)} total from grouped countries`);
+  const list = section.append("div").attr("class", "other-country-list");
+  list.selectAll("p").data(rows).enter().append("p")
+    .attr("class", "other-country-row")
+    .text((row) => `${row.country}: ${formatCount(row.count)}`);
+}
+
+// Countries with more than 100 total children are listed individually.
+function renderCountryTrend(panel, country) {
+  const trend = FEATURED_COUNTRY_TRENDS[country];
+  if (!trend) return;
+
+  const section = panel.append("section").attr("class", "details-group country-trend");
+  section.append("h5").text("Trend");
+  section.append("p").attr("class", "country-trend-text").text(trend);
 }
 
 export function renderCountryDetails(container, country, data) {
@@ -27,13 +56,13 @@ export function renderCountryDetails(container, country, data) {
 
   if (!country) {
     panel.append("p").attr("class", "details-prompt")
-      .text("Select a country to see its total, gender breakdown, and sponsor categories.");
+      .text("Click a country to see its total, gender breakdown, sponsor categories, and trend summary.");
     return;
   }
 
   const detail = data.countryDetails[country];
 
-  panel.append("h4").text(`${country} details`);
+  panel.append("h4").text(`${displayCountryLabel(country)} details`);
   panel.append("p").attr("class", "details-total")
     .text(`${formatCount(detail.total)} unaccompanied children entered the United States`);
 
@@ -50,6 +79,8 @@ export function renderCountryDetails(container, country, data) {
 
   if (country === "Other") {
     renderOtherBreakdown(panel, data);
+  } else {
+    renderCountryTrend(panel, country);
   }
 }
 
@@ -97,7 +128,8 @@ export function renderSceneThree(root, data, state) {
 
   const legend = scene.select(".country-legend");
   legend.selectAll("*").remove();
-  legend.append("h4").attr("id", "country-legend-title").text("Select a country");
+  legend.append("h4").attr("id", "country-legend-title").text("Click a country to isolate it");
+  legend.append("p").attr("class", "legend-help").text("Choose one line to focus the timeline, or show all countries to reset.");
   const controls = legend.append("div").attr("class", "legend-controls");
   const buttons = controls.selectAll("button").data(countries).enter().append("button")
     .attr("type", "button")
@@ -105,7 +137,7 @@ export function renderSceneThree(root, data, state) {
     .on("click", (_, country) => selectCountry(country));
   buttons.append("span").attr("class", "legend-swatch")
     .style("background-color", (country) => countryColor(country));
-  buttons.append("span").text((country) => country);
+  buttons.append("span").text((country) => displayCountryLabel(country));
 
   const reset = legend.append("button").attr("type", "button")
     .attr("class", "show-all-button")
@@ -119,7 +151,7 @@ export function renderSceneThree(root, data, state) {
     state.selectedCountry = country;
     buttons.classed("is-selected", (d) => d === country);
     reset.classed("is-selected", !country);
-    selectedLabel.text(country ? `${country} selected` : "All countries shown");
+    selectedLabel.text(country ? `${displayCountryLabel(country)} selected` : "All countries shown");
     drawChart(country);
     renderCountryDetails(details.node(), country, data);
   }
