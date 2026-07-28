@@ -27,7 +27,7 @@ const sceneTwo = d3.select("#scene-two");
 const sceneThree = d3.select("#scene-three");
 
 renderSceneOne(sceneOne.node(), data);
-renderNextButton(sceneOne.select(".scene-actions").node(), "When did they come?", () => showScene(1));
+renderNextButton(sceneOne.select(".scene-actions").node(), "Who are these children?", () => showScene(1));
 renderSceneTwo(sceneTwo.node(), data);
 renderNextButton(sceneTwo.select(".scene-actions").node(), "How did this change over time?", () => showScene(2));
 renderSceneThree(sceneThree.node(), data, state);
