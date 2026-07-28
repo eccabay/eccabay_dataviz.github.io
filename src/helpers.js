@@ -161,7 +161,12 @@ export function addAxes(plot, x, y, width, height, {xLabel, yLabel} = {}) {
     const xAxis = plot.append("g").attr("class", "x-axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
     const yAxis = plot.append("g").attr("class", "y-axis").call(d3.axisLeft(y).ticks(5));
     xAxis.append("text").attr("x", width).attr("y", 42).text(xLabel);
-    yAxis.append("text").attr("transform", "rotate(-90)").attr("x", -8).attr("y", -42).text(yLabel);
+    yAxis.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -60)
+        .attr("text-anchor", "middle")
+        .text(yLabel);
     return { xAxis, yAxis };
 }
 

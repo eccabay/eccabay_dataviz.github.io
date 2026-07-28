@@ -51,7 +51,7 @@ h3 {
   margin: 0;
 }
 h1 {
-  font-size: clamp(2.2rem, 6vw, 4.5rem);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
   max-width: 840px;
 }
 h2 {
@@ -76,11 +76,11 @@ h3 {
   max-width: 840px;
   margin: 18px 0 30px;
 }
-#scene-one > h3 {
+#scene-two > h3 {
   margin: 14px 0 32px;
   max-width: 1000px;
 }
-#scene-one .chart-grid {
+#scene-two .chart-grid {
   margin-top: 8px;
 }
 .chart-grid {
@@ -292,7 +292,7 @@ button:focus-visible {
     grid-template-columns: 1fr;
   }
   .scene-intro,
-  #scene-one > h3,
+  #scene-two > h3,
   .data-note,
   .placeholder-copy,
   .scene-copy,
