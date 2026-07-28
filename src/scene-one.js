@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { countryColor, renderBars, renderGender, sponsorColor } from "./helpers.js";
+import { countryColor, renderBars, renderGender, renderSponsorBreakdown } from "./helpers.js";
 
 export function renderSceneOne(root, data) {
   const scene = d3.select(root);
@@ -13,8 +13,5 @@ export function renderSceneOne(root, data) {
     .map((d) => ({ label: d.country, value: d.count, color: countryColor(d.country) })), "#2f4f9f", "Country of origin totals");
 
   renderGender(scene.select(".gender-chart").node(), data.genderTotals);
-  
-  renderBars(scene.select(".sponsor-chart").node(), [...data.sponsorTotals]
-    .sort((a, b) => d3.descending(a.count, b.count))
-    .map((d) => ({ label: d.label, value: d.count, color: sponsorColor(d.label) })), sponsorColor("Parent"), "Sponsor category totals");
+  renderSponsorBreakdown(scene.select(".sponsor-chart").node(), data.sponsorTotalsByCategory);
 }

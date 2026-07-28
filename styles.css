@@ -228,11 +228,14 @@ button:focus-visible {
 }
 .details-groups {
   display: grid;
-  gap: 14px;
-  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  grid-template-columns: 1fr;
 }
 .details-group h5 {
-  margin: 0 0 5px;
+  margin: 0 0 8px;
+}
+.details-chart {
+  margin-top: 4px;
 }
 .details-group p {
   color: #55717a;

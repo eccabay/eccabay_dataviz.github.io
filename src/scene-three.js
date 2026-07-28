@@ -1,13 +1,5 @@
 import * as d3 from "d3";
-import { addAnnotationLines, addAxes, countryColor, createSvg, createTooltip, formatCount, formatPercent } from "./helpers.js";
-
-const annotations = [
-  { date: new Date("2016-11-08T00:00:00"), label: "Donald Trump elected" },
-  { date: new Date("2017-01-20T00:00:00"), label: "Donald Trump takes office" },
-  { date: new Date("2020-11-03T00:00:00"), label: "Joe Biden elected" },
-  { date: new Date("2021-01-20T00:00:00"), label: "Joe Biden takes office" }
-];
-const sponsorLabels = new Map([["1", "Parent"], ["2", "Sibling"], ["3", "Distant Relative or Unrelated"], ["4", "Family Friend"]]);
+import { countryColor, createTooltip, formatCount, renderGender, renderSponsorBreakdown, renderTimeline } from "./helpers.js";
 
 function countrySeries(months, countries) {
   return countries.map((country) => ({
@@ -40,8 +32,6 @@ export function renderCountryDetails(container, country, data) {
   }
 
   const detail = data.countryDetails[country];
-  const genderTotal = d3.sum(Object.values(detail.gender));
-  const sponsorTotal = d3.sum(Object.values(detail.sponsors));
 
   panel.append("h4").text(`${country} details`);
   panel.append("p").attr("class", "details-total")
@@ -50,13 +40,13 @@ export function renderCountryDetails(container, country, data) {
   const groups = panel.append("div").attr("class", "details-groups");
   const gender = groups.append("section").attr("class", "details-group");
   gender.append("h5").text("Reported gender");
-  gender.selectAll("p").data(["M", "F"]).enter().append("p")
-    .text((key) => `${key === "M" ? "Male" : "Female"}: ${formatPercent(detail.gender[key] / genderTotal)}`);
+  gender.append("div").attr("class", "chart details-chart gender-chart");
+  renderGender(gender.select(".gender-chart").node(), detail.gender);
 
   const sponsors = groups.append("section").attr("class", "details-group");
   sponsors.append("h5").text("Sponsor category");
-  sponsors.selectAll("p").data(["1", "2", "3", "4"]).enter().append("p")
-    .text((key) => `${sponsorLabels.get(key)}: ${formatPercent(detail.sponsors[key] / sponsorTotal)}`);
+  sponsors.append("div").attr("class", "chart details-chart sponsor-chart");
+  renderSponsorBreakdown(sponsors.select(".sponsor-chart").node(), detail.sponsors);
 
   if (country === "Other") {
     renderOtherBreakdown(panel, data);
@@ -72,40 +62,37 @@ export function renderSceneThree(root, data, state) {
 
   function drawChart(selectedCountry) {
     chartHost.selectAll("*").remove();
-    const { plot, width: innerWidth, height: innerHeight } = createSvg(chartHost.node());
     const visibleSeries = selectedCountry ? series.filter((item) => item.country === selectedCountry) : series;
 
-    const x = d3.scaleTime().domain(d3.extent(data.months, (d) => d.month)).range([0, innerWidth]);
-    const y = d3.scaleLinear().domain([0, maxSeriesValue(visibleSeries)]).nice().range([innerHeight, 0]);
-    const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
+    renderTimeline(chartHost.node(), {
+      xDomain: d3.extent(data.months, (d) => d.month),
+      yDomain: [0, maxSeriesValue(visibleSeries)],
+      xLabel: "Month",
+      yLabel: "Children entering the United States"
+    }, ({ plot, x, y }) => {
+      const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
 
-    plot.append("g").attr("class", "grid")
-      .call(d3.axisLeft(y).ticks(5).tickSize(-innerWidth).tickFormat(""));
-    addAxes(plot, x, y, innerWidth, innerHeight, { xLabel: "Month", yLabel: "Children entering the United States" });
-    addAnnotationLines(plot, x, innerHeight, annotations);
+      const lineGroup = plot.append("g").attr("class", "country-lines");
+      lineGroup.selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
+        .attr("class", "country-line")
+        .attr("data-country", (d) => d.country)
+        .attr("stroke", (d) => countryColor(d.country))
+        .attr("d", (d) => line(d.values));
 
-    const lineGroup = plot.append("g").attr("class", "country-lines");
-    const lines = lineGroup.selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
-      .attr("class", "country-line")
-      .attr("data-country", (d) => d.country)
-      .attr("stroke", (d) => countryColor(d.country))
-      .attr("d", (d) => line(d.values));
-
-    plot.append("g").attr("class", "country-line-hover")
-      .selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
-      .attr("class", "country-line-hit")
-      .attr("data-country", (d) => d.country)
-      .attr("d", (d) => line(d.values))
-      .attr("fill", "none")
-      .attr("stroke", "transparent")
-      .attr("stroke-width", 18)
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .on("pointerenter", (event, d) => tooltip.show(event, d.country))
-      .on("pointermove", (event) => tooltip.move(event))
-      .on("pointerleave", () => tooltip.hide());
-
-    return lines;
+      plot.append("g").attr("class", "country-line-hover")
+        .selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
+        .attr("class", "country-line-hit")
+        .attr("data-country", (d) => d.country)
+        .attr("d", (d) => line(d.values))
+        .attr("fill", "none")
+        .attr("stroke", "transparent")
+        .attr("stroke-width", 18)
+        .attr("stroke-linejoin", "round")
+        .attr("stroke-linecap", "round")
+        .on("pointerenter", (event, d) => tooltip.show(event, d.country))
+        .on("pointermove", (event) => tooltip.move(event))
+        .on("pointerleave", () => tooltip.hide());
+    });
   }
 
   const legend = scene.select(".country-legend");

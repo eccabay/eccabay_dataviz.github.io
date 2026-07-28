@@ -8,46 +8,56 @@ const COUNTRY_COLORS = Object.freeze(Object.fromEntries(
 export const countryColor = (country) => COUNTRY_COLORS[country] ?? "#535c5f";
 
 export const COLORS = {
-    gender:["#2b7896","#c06f9f"],
-    sponsors:["#9f4c48","#c2b64f","#4f6096","#5d9368"]
+    gender:["#2b7896", "#c06f9f"],
+    sponsors:["#9f4c48", "#c2b64f", "#4f6096", "#5d9368"]
 };
-const SPONSOR_NAMES = ["Parent", "Sibling", "Distant Relative or Unrelated", "Family Friend"];
+const SPONSOR_NAMES = ["Parent", "Sibling", "Distant Relative", "Family Friend"];
+export const SPONSOR_LABELS = new Map([
+  ["1", "Parent"],
+  ["2", "Sibling"],
+  ["3", "Distant Relative"],
+  ["4", "Family Friend"]
+]);
+export const sponsorLabel = (key) => SPONSOR_LABELS.get(key) ?? key;
 export const sponsorColor = (label) => COLORS.sponsors[SPONSOR_NAMES.indexOf(label)] ?? COLORS.sponsors[0];
 export const formatCount = d3.format(",d");
-export const formatPercent = (value) => d3.format(".1%")(+value||0);
-export const formatMonth=d3.timeFormat("%b %Y");
+export const formatPercent = (value) => d3.format(".1%")( +value || 0 );
+export const formatMonth = d3.timeFormat("%b %Y");
+
+export const TIMELINE_ANNOTATIONS = [
+  { date: new Date("2016-11-08T00:00:00"), label: "Donald Trump elected" },
+  { date: new Date("2017-01-20T00:00:00"), label: "Donald Trump takes office" },
+  { date: new Date("2020-11-03T00:00:00"), label: "Joe Biden elected" },
+  { date: new Date("2021-01-20T00:00:00"), label: "Joe Biden takes office" }
+];
 
 const width = 840;
 const height = 470;
 const margin = { top: 25, right: 75, bottom: 50, left: 100 };
 
-export function createSvg(container) {
-    const svg = d3.select(container).append("svg").attr("viewBox",`0 0 ${width} ${height}`).attr("role", "img");
-    return { 
+export function createSvg(container, svgWidth = width, svgHeight = height, svgMargin = margin) {
+    const svg = d3.select(container).append("svg").attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`).attr("role", "img");
+    return {
         svg,
-        plot: svg.append("g").attr("transform",`translate(${margin.left},${margin.top})`),
-        width: width-margin.left-margin.right,
-        height: height-margin.top-margin.bottom
-    }; 
+        plot: svg.append("g").attr("transform", `translate(${svgMargin.left},${svgMargin.top})`),
+        width: svgWidth - svgMargin.left - svgMargin.right,
+        height: svgHeight - svgMargin.top - svgMargin.bottom
+    };
 }
 
 export function renderBars(container, values, color, label) {
-
-  // Configure size
-  const width = 720;
-  const height = margin.top + margin.bottom + values.length * 34;
-  const { svg, plot, width: innerWidth, height: innerHeight } = createSvg(container, width, height, margin);
+  const svgWidth = 720;
+  const svgHeight = margin.top + margin.bottom + values.length * 34;
+  const { plot, width: innerWidth, height: innerHeight } = createSvg(container, svgWidth, svgHeight, margin);
   const y = d3.scaleBand().domain(values.map((d) => d.label)).range([0, innerHeight]).padding(0.25);
   const x = d3.scaleLinear().domain([0, d3.max(values, (d) => d.value)]).range([0, innerWidth]);
 
-  // Draw bar lines
   plot.append("g").attr("class", "grid").call(d3.axisLeft(y).tickSize(-innerWidth).tickFormat(""));
   plot.selectAll(".bar").data(values).enter().append("rect")
     .attr("class", "bar").attr("x", 0).attr("y", (d) => y(d.label))
     .attr("width", (d) => x(d.value)).attr("height", y.bandwidth())
     .attr("fill", (d) => d.color ?? color);
 
-  // Add axes
   plot.append("g").attr("class", "y-axis").call(d3.axisLeft(y).tickSize(0));
   plot.append("g").attr("class", "x-axis").attr("transform", `translate(0,${innerHeight})`)
     .call(d3.axisBottom(x).ticks(5).tickFormat(formatCount));
@@ -57,15 +67,49 @@ export function renderBars(container, values, color, label) {
     .text((d) => d.annotation ?? formatCount(d.value));
 }
 
+function renderPercentageBars(container, values, title) {
+  const total = d3.sum(values, (d) => d.value);
+  renderBars(container, values.map((d) => ({
+    ...d,
+    annotation: `${formatPercent(d.value / total)} (${formatCount(d.value)})`
+  })), values[0]?.color ?? COLORS.gender[0], title);
+}
+
 export function renderGender(container, totals) {
   const values = ["M", "F"].map((key, i) => ({
-    label: key === "M" ? "Male" : "Female", value: +totals[key], color: COLORS.gender[i]
+    label: key === "M" ? "Male" : "Female",
+    value: +totals[key],
+    color: COLORS.gender[i]
   }));
-  const total = d3.sum(values, (d) => d.value);
 
-  renderBars(container, values.map((d) => ({
-    ...d, annotation: `${formatPercent(d.value / total)} (${formatCount(d.value)})`
-  })), COLORS.gender[0], "Reported gender percentages");
+  renderPercentageBars(container, values, "Reported gender percentages");
+}
+
+export function renderSponsorBreakdown(container, totals) {
+  const values = ["1", "2", "3", "4"].map((key, i) => ({
+    label: sponsorLabel(key),
+    value: +totals[key],
+    color: COLORS.sponsors[i]
+  }));
+
+  renderPercentageBars(container, values, "Sponsor category percentages");
+}
+
+export function renderTimeline(container, { xDomain, yDomain, xLabel, yLabel, annotations = TIMELINE_ANNOTATIONS }, draw) {
+  const { plot, width: innerWidth, height: innerHeight } = createSvg(container);
+  const x = d3.scaleTime().domain(xDomain).range([0, innerWidth]);
+  const y = d3.scaleLinear().domain(yDomain).nice().range([innerHeight, 0]);
+
+  plot.append("g").attr("class", "grid")
+    .call(d3.axisLeft(y).ticks(5).tickSize(-innerWidth).tickFormat(""));
+  addAxes(plot, x, y, innerWidth, innerHeight, { xLabel, yLabel });
+  addAnnotationLines(plot, x, innerHeight, annotations);
+
+  if (draw) {
+    draw({ plot, x, y, innerWidth, innerHeight });
+  }
+
+  return { plot, x, y, innerWidth, innerHeight };
 }
 
 let tooltipSingleton = null;
@@ -113,12 +157,12 @@ export function createTooltip() {
     return tooltipSingleton;
 }
 
-export function addAxes(plot, x, y, width, height, {xLabel, yLabel} = {}) { 
+export function addAxes(plot, x, y, width, height, {xLabel, yLabel} = {}) {
     const xAxis = plot.append("g").attr("class", "x-axis").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
     const yAxis = plot.append("g").attr("class", "y-axis").call(d3.axisLeft(y).ticks(5));
     xAxis.append("text").attr("x", width).attr("y", 42).text(xLabel);
-    yAxis.append("text").attr("transform","rotate(-90)").attr("x", -8).attr("y", -42).text(yLabel);
-    return {xAxis,yAxis}; 
+    yAxis.append("text").attr("transform", "rotate(-90)").attr("x", -8).attr("y", -42).text(yLabel);
+    return { xAxis, yAxis };
 }
 
 export function addAnnotationLines(plot, x, height, annotations) {
@@ -134,6 +178,6 @@ export function addAnnotationLines(plot, x, height, annotations) {
     return group;
 }
 
-export function renderNextButton(container, label, onClick) { 
-    return d3.select(container).append("button").attr("class", "next-button").text(label).on("click", onClick); 
+export function renderNextButton(container, label, onClick) {
+    return d3.select(container).append("button").attr("class", "next-button").text(label).on("click", onClick);
 }
