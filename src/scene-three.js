@@ -48,16 +48,18 @@ function renderCountryTrend(panel, country) {
   section.append("p").attr("class", "country-trend-text").text(trend);
 }
 
-export function renderCountryDetails(container, country, data) {
+export function renderCountryDetails(container, selectedCountries, data) {
   const panel = d3.select(container);
   panel.selectAll("*").remove();
 
-  if (!country) {
+  const activeCountries = selectedCountries ?? [];
+  if (activeCountries.length !== 1) {
     panel.append("p").attr("class", "details-prompt")
-      .text("Click a country to see its total, gender breakdown, sponsor categories, and trend summary.");
+      .text("Click one country to see its total, gender breakdown, sponsor categories, and trend summary.");
     return;
   }
 
+  const country = activeCountries[0];
   const detail = data.countryDetails[country];
 
   panel.append("h4").text(`${displayCountryLabel(country)} details`);
@@ -89,9 +91,11 @@ export function renderSceneThree(root, data, state) {
   const series = countrySeries(data.months, countries);
   const chartHost = scene.select(".country-monthly-chart");
 
-  function drawChart(selectedCountry) {
+  function drawChart(selectedCountries) {
     chartHost.selectAll("*").remove();
-    const visibleSeries = selectedCountry ? series.filter((item) => item.country === selectedCountry) : series;
+    const activeCountries = selectedCountries ?? [];
+    const activeCountrySet = new Set(activeCountries);
+    const visibleSeries = activeCountries.length ? series.filter((item) => activeCountrySet.has(item.country)) : series;
 
     renderTimeline(chartHost.node(), {
       xDomain: d3.extent(data.months, (d) => d.month),
@@ -100,13 +104,13 @@ export function renderSceneThree(root, data, state) {
       yLabel: "Children entering the United States"
     }, ({ plot, x, y, innerWidth, innerHeight }) => {
       const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
-      const lineHost = selectedCountry
+      const lineHost = activeCountries.length === 1
         ? animateXReveal(plot, innerWidth, innerHeight)
         : plot.append("g").attr("class", "country-lines");
 
       lineHost.attr("class", "country-lines");
       lineHost.selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
-        .attr("class", "country-line")
+        .attr("class", (d) => `country-line${activeCountrySet.has(d.country) ? " is-selected" : ""}`)
         .attr("data-country", (d) => d.country)
         .attr("stroke", (d) => countryColor(d.country))
         .attr("d", (d) => line(d.values));
@@ -129,13 +133,14 @@ export function renderSceneThree(root, data, state) {
 
   const legend = scene.select(".country-legend");
   legend.selectAll("*").remove();
-  legend.append("h4").attr("id", "country-legend-title").text("Click a country to isolate it");
-  legend.append("p").attr("class", "legend-help").text("Choose one line to focus the timeline, or show all countries to reset.");
+  legend.append("h4").attr("id", "country-legend-title").text("Click countries to compare them");
+  legend.append("p").attr("class", "legend-help").text("Click one or more countries to add or remove their lines. Use Show all countries to reset.");
+  
   const controls = legend.append("div").attr("class", "legend-controls");
   const buttons = controls.selectAll("button").data(countries).enter().append("button")
     .attr("type", "button")
     .attr("class", "country-button")
-    .on("click", (_, country) => selectCountry(country));
+    .on("click", (_, country) => toggleCountry(country));
   buttons.append("span").attr("class", "legend-swatch")
     .style("background-color", (country) => countryColor(country));
   buttons.append("span").text((country) => displayCountryLabel(country));
@@ -143,19 +148,42 @@ export function renderSceneThree(root, data, state) {
   const reset = legend.append("button").attr("type", "button")
     .attr("class", "show-all-button")
     .text("Show all countries")
-    .on("click", () => selectCountry(null));
+    .on("click", () => clearSelection());
 
   const selectedLabel = scene.select(".selected-country-label");
   const details = scene.select(".country-details");
 
-  function selectCountry(country) {
-    state.selectedCountry = country;
-    buttons.classed("is-selected", (d) => d === country);
-    reset.classed("is-selected", !country);
-    selectedLabel.text(country ? `${displayCountryLabel(country)} selected` : "All countries shown");
-    drawChart(country);
-    renderCountryDetails(details.node(), country, data);
+  function updateSelection(selectedCountries) {
+    const activeCountries = selectedCountries ?? [];
+    state.selectedCountries = [...activeCountries];
+
+    const activeCountrySet = new Set(activeCountries);
+
+    buttons.classed("is-selected", (d) => activeCountrySet.has(d));
+    reset.classed("is-selected", activeCountries.length === 0);
+
+    selectedLabel.text(activeCountries.length === 0
+      ? "All countries shown"
+      : activeCountries.length === 1
+        ? `${displayCountryLabel(activeCountries[0])} selected`
+        : `${activeCountries.length} countries selected`);
+
+    drawChart(activeCountries);
+    renderCountryDetails(details.node(), activeCountries, data);
   }
 
-  selectCountry(state.selectedCountry ?? null);
+  function toggleCountry(country) {
+    const activeCountries = state.selectedCountries ?? [];
+
+    const next = activeCountries.includes(country)
+      ? activeCountries.filter((item) => item !== country)
+      : [...activeCountries, country].filter((item, index, list) => list.indexOf(item) === index && countries.includes(item));
+    updateSelection(countries.filter((item) => next.includes(item)));
+  }
+
+  function clearSelection() {
+    updateSelection([]);
+  }
+
+  updateSelection(state.selectedCountries ?? []);
 }

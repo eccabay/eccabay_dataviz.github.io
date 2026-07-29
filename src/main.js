@@ -5,7 +5,7 @@ import { renderSceneOne } from "./scene-one.js";
 import { renderSceneTwo } from "./scene-two.js";
 import { renderSceneThree } from "./scene-three.js";
 
-const state = { currentScene: 0, selectedCountry: null };
+const state = { currentScene: 0, selectedCountries: [] };
 const app = d3.select(".page-shell");
 const progress = d3.select("#progress");
 const errorMessage = d3.select("#app-error");
