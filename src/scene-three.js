@@ -22,10 +22,8 @@ const FEATURED_COUNTRY_TRENDS = {
   India: "Remains a smaller but persistent line, with relatively more frequent spikes during the Trump administration."
 };
 
-const GROUPED_COUNTRIES_LABEL = "Grouped countries";
-
 function displayCountryLabel(country) {
-  return country === "Other" ? GROUPED_COUNTRIES_LABEL : country;
+  return country === "Other" ? "Grouped countries" : country;
 }
 
 function renderOtherBreakdown(panel, data) {

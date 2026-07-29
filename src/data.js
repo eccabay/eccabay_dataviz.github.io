@@ -15,7 +15,7 @@ function aggregateOtherCountries(rawTotals) {
 
   return [
     ...individualCountries,
-    { country: "Grouped countries", count: lowCountTotal }
+    { country: "Other", count: lowCountTotal }
   ];
 }
 

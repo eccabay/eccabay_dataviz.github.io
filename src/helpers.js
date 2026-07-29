@@ -210,6 +210,19 @@ export function addAnnotationLines(plot, x, height, annotations) {
     return group;
 }
 
+function renderNavButton(container, label, onClick, className) {
+    return d3.select(container)
+        .append("button")
+        .attr("type", "button")
+        .attr("class", className)
+        .text(label)
+        .on("click", onClick);
+}
+
 export function renderNextButton(container, label, onClick) {
-    return d3.select(container).append("button").attr("class", "next-button").text(label).on("click", onClick);
+    return renderNavButton(container, label, onClick, "nav-button next-button");
+}
+
+export function renderBackButton(container, label, onClick) {
+    return renderNavButton(container, label, onClick, "nav-button back-button");
 }

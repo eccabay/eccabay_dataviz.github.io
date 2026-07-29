@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { loadData } from "./data.js";
-import { renderNextButton } from "./helpers.js";
+import { renderBackButton, renderNextButton } from "./helpers.js";
 import { renderSceneOne } from "./scene-one.js";
 import { renderSceneTwo } from "./scene-two.js";
 import { renderSceneThree } from "./scene-three.js";
@@ -32,6 +32,8 @@ const sceneThree = d3.select("#scene-three");
 renderSceneOne(sceneOne.node(), data);
 renderNextButton(sceneOne.select(".scene-actions").node(), "Who are these children?", () => showScene(1));
 renderSceneTwo(sceneTwo.node(), data);
+renderBackButton(sceneTwo.select(".scene-actions").node(), "Back", () => showScene(0));
 renderNextButton(sceneTwo.select(".scene-actions").node(), "How did this change over time?", () => showScene(2));
 renderSceneThree(sceneThree.node(), data, state);
+renderBackButton(sceneThree.select(".scene-actions").node(), "Back", () => showScene(1));
 showScene(0, { focus: false });
