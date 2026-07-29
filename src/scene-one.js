@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { formatCount, formatMonth, renderTimeline, createTooltip } from "./helpers.js";
+import { animateXReveal, formatCount, formatMonth, renderTimeline, createTooltip } from "./helpers.js";
 
 export function renderSceneOne(root,data) {
   const scene = d3.select(root);
@@ -10,15 +10,16 @@ export function renderSceneOne(root,data) {
     yDomain: [0, d3.max(data.months, (d) => d.entries)],
     xLabel: "Month",
     yLabel: "Children entering the United States"
-  }, ({ plot, x, y }) => {
+  }, ({ plot, x, y, innerWidth, innerHeight }) => {
+    const reveal = animateXReveal(plot, innerWidth, innerHeight, { delay: 1000 });
     const line = d3.line().x((d) => x(d.month)).y((d) => y(d.entries));
 
-    plot.append("path").datum(data.months).attr("class", "time-line").attr("d", line);
-    plot.selectAll(".time-point")
+    reveal.append("path").datum(data.months).attr("class", "time-line").attr("d", line);
+    reveal.selectAll(".time-point")
       .data(data.months).enter().append("circle")
       .attr("class", "time-point").attr("cx", (d) => x(d.month)).attr("cy", (d) => y(d.entries)).attr("r", 2.5);
 
-    plot.append("g")
+    reveal.append("g")
       .selectAll("circle").data(data.months).enter().append("circle")
       .attr("cx", (d) => x(d.month))
       .attr("cy", (d) => y(d.entries))

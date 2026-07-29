@@ -112,6 +112,33 @@ export function renderTimeline(container, { xDomain, yDomain, xLabel, yLabel, an
   return { plot, x, y, innerWidth, innerHeight };
 }
 
+let xRevealId = 0;
+
+export function animateXReveal(plot, innerWidth, innerHeight, { delay = 0 } = {}) {
+  const svg = d3.select(plot.node()?.ownerSVGElement);
+  if (svg.empty()) {
+    return plot.append("g");
+  }
+
+  const defs = svg.select("defs").empty() ? svg.append("defs") : svg.select("defs");
+  const clipId = `x-reveal-${++xRevealId}`;
+  const clipPath = defs.append("clipPath").attr("id", clipId);
+  const reveal = clipPath.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", 0)
+    .attr("height", innerHeight);
+
+  const group = plot.append("g").attr("clip-path", `url(#${clipId})`);
+  reveal.transition()
+    .delay(delay)
+    .duration(5*innerWidth)
+    .ease(d3.easeLinear)
+    .attr("width", innerWidth);
+
+  return group;
+}
+
 let tooltipSingleton = null;
 
 export function createTooltip() {

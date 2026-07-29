@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { countryColor, createTooltip, formatCount, renderGender, renderSponsorBreakdown, renderTimeline } from "./helpers.js";
+import { animateXReveal, countryColor, createTooltip, formatCount, renderGender, renderSponsorBreakdown, renderTimeline } from "./helpers.js";
 
 function countrySeries(months, countries) {
   return countries.map((country) => ({
@@ -14,12 +14,12 @@ function maxSeriesValue(series) {
 
 const FEATURED_COUNTRY_TRENDS = {
   Guatemala: "Dominates the timeline, with a major surge after 2020 and the largest totals overall.",
-  Honduras: "Follows the same broad shape as Guatemala, rising sharply in 2021-2022 before easing.",
-  "El Salvador": "Starts high, drops in the middle years, then rebounds modestly later on.",
-  Mexico: "Stays comparatively low and steady, with a late uptick in 2021-2023.",
-  Ecuador: "Builds gradually, then jumps in 2019 and remains elevated through 2023.",
+  Honduras: "Follows the same broad shape as Guatemala, rising sharply after the 2021 inauguration before easing.",
+  "El Salvador": "Starts high, drops during the Trump administration, then rebounds modestly later on.",
+  Mexico: "Stays comparatively low and steady, with a late uptick during the Biden administration.",
+  Ecuador: "Builds gradually, then increases more rapidly through the Biden administration.",
   Nicaragua: "Moves from small counts to a strong 2021-2022 peak before falling back.",
-  India: "Remains a smaller but persistent line, with its strongest stretch in the late 2010s."
+  India: "Remains a smaller but persistent line, with relatively more frequent spikes during the Trump administration."
 };
 
 const GROUPED_COUNTRIES_LABEL = "Grouped countries";
@@ -32,7 +32,7 @@ function renderOtherBreakdown(panel, data) {
   const rows = data.otherCountryTotals ?? [];
   const total = d3.sum(rows, (row) => row.count);
   const section = panel.append("section").attr("class", "details-group other-details");
-  section.append("p").attr("class", "other-note").text("Countries with more than 100 total children are are listed individually. The others are grouped below.");
+  section.append("p").attr("class", "other-note").text("Countries with more than 100 total children are listed individually. The others are grouped below.");
   section.append("p").attr("class", "other-total").text(`${formatCount(total)} total from grouped countries`);
   const list = section.append("div").attr("class", "other-country-list");
   list.selectAll("p").data(rows).enter().append("p")
@@ -100,17 +100,20 @@ export function renderSceneThree(root, data, state) {
       yDomain: [0, maxSeriesValue(visibleSeries)],
       xLabel: "Month",
       yLabel: "Children entering the United States"
-    }, ({ plot, x, y }) => {
+    }, ({ plot, x, y, innerWidth, innerHeight }) => {
       const line = d3.line().x((d) => x(d.month)).y((d) => y(d.value));
+      const lineHost = selectedCountry
+        ? animateXReveal(plot, innerWidth, innerHeight)
+        : plot.append("g").attr("class", "country-lines");
 
-      const lineGroup = plot.append("g").attr("class", "country-lines");
-      lineGroup.selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
+      lineHost.attr("class", "country-lines");
+      lineHost.selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
         .attr("class", "country-line")
         .attr("data-country", (d) => d.country)
         .attr("stroke", (d) => countryColor(d.country))
         .attr("d", (d) => line(d.values));
 
-      plot.append("g").attr("class", "country-line-hover")
+      lineHost.append("g").attr("class", "country-line-hover")
         .selectAll("path").data(visibleSeries, (d) => d.country).enter().append("path")
         .attr("class", "country-line-hit")
         .attr("data-country", (d) => d.country)
