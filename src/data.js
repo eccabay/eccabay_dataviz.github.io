@@ -1,5 +1,4 @@
 import * as d3 from "d3";
-import rawCountryTotals from "../data/country_totals_raw.json";
 
 const countries = ["Guatemala", "Honduras", "El Salvador", "Mexico", "Ecuador", "Nicaragua", "India", "Other"];
 const featuredCountries = countries.slice(0, -1);
@@ -25,9 +24,10 @@ export async function loadData() {
     "monthly_summary.json",
     "country_totals.json",
     "sponsor_category_totals.json",
-    "derived_summary.json"
+    "derived_summary.json",
+    "country_totals_raw.json"
   ];
-  const [manifest, monthly, countryTotals, sponsorTotals, derived] = await Promise.all(files.map((file) => d3.json("./data/" + file)));
+  const [manifest, monthly, countryTotals, sponsorTotals, derived, rawCountryTotals] = await Promise.all(files.map((file) => d3.json("./data/" + file)));
 
   const months = monthly.map((row) => ({
     month: d3.timeParse("%Y-%m")(row.month), entries: +row.entries, countries: Object.fromEntries(countries.map((country) => [country, +(row.countryCounts[country] ?? 0)]))
